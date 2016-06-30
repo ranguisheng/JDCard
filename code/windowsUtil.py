@@ -13,7 +13,12 @@ def handle_window(hwnd, extra):
             win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
 def closeWin():
     print('开始关闭图片查看器....')
-    win32gui.EnumWindows(handle_window, None)
+    try:
+        win32gui.EnumWindows(handle_window, None)
+    except Exception as e:
+        print('Error:',e)
+        traceback.print_exc()
+        logging.exception(e)
     print('关闭完成！')
 if __name__ == '__main__':
     closeWin()
