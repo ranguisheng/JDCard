@@ -23,7 +23,7 @@ def init():
     try:
         all_the_text = file_object.read()
         password =  all_the_text
-        print('got passwd:%s' % password)
+#         print('got passwd:%s' % password)
     except Exception as e:
         print("Error:",e)
         traceback.print_exc()
@@ -62,27 +62,27 @@ def processCookie():
 #获取和组装post请求数据
 def packagePostData():
     login = Navigate(loginPageUrl)
-    print('获取到登录页的内容：')
-    print(login)
+#     print('获取到登录页的内容：')
+#     print(login)
     loginSoup = BeautifulSoup(login,'html.parser')
     #查找登陆参数中的uuid
     uuid = loginSoup.find_all("form")[0].find_all("input")[0]['value']
-    print('uuid: %s' % uuid)
+#     print('uuid: %s' % uuid)
     global UUID
     UUID=uuid
     #获取form表单里的隐藏域信息
     name4 = loginSoup.find_all("form")[0].find_all("input")[4]['name']  
     value4 = loginSoup.find_all("form")[0].find_all("input")[4]['value']
-    print(name4,value4)
+#     print(name4,value4)
     name5 = loginSoup.find_all("form")[0].find_all("input")[5]['name']  
     value5 = loginSoup.find_all("form")[0].find_all("input")[5]['value']
-    print(name5,value5)
+#     print(name5,value5)
     name6 = loginSoup.find_all("form")[0].find_all("input")[6]['name']  
     value6 = loginSoup.find_all("form")[0].find_all("input")[6]['value']
-    print(name6,value6) 
+#     print(name6,value6) 
     name7 = loginSoup.find_all("form")[0].find_all("input")[7]['name']  
     value7 = loginSoup.find_all("form")[0].find_all("input")[7]['value']
-    print(name7,value7) 
+#     print(name7,value7) 
     #print url
     postData = {
       'loginname':userName,
@@ -108,8 +108,8 @@ def packagePostData():
     #关闭图片查看器
     windowsUtil.closeWin()
     postData['authcode'] = str(checkCode)
-    print('login postData:')
-    print(postData)
+#     print('login postData:')
+#     print(postData)
     return postData
 if __name__=='__main__':
     processCookie()
