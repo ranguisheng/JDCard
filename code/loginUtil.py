@@ -12,23 +12,30 @@ RETRY_COUNT=5
 loginPageUrl = "https://passport.jd.com/new/login.aspx"
 loginPostUrl = "http://passport.jd.com/uc/loginService"
 pwdFilePath = "E:/private/pwd.txt"
+usernameFilePath = "E:/private/username.txt"
 UUID=''
-userName='13426314653'
+userName=''
 password=''
 imgPath='E:/private/image/'
 #定义连接函数，有超时重连功能
 def init():
     global password
-    file_object = open(pwdFilePath)
+    global userName
+    pwdFileObj = open(pwdFilePath)
+    usernameFileObj = open(usernameFilePath)
     try:
-        all_the_text = file_object.read()
+        all_the_text = pwdFileObj.read()
         password =  all_the_text
+        
+        all_the_text1 = usernameFileObj.read()
+        userName =  all_the_text1
 #         print('got passwd:%s' % password)
     except Exception as e:
         print("Error:",e)
         traceback.print_exc()
     finally:
-        file_object.close( )
+        pwdFileObj.close( )
+        usernameFileObj.close( )
 def Navigate(url,data={}):           
     tryTimes = 0
     while True:
