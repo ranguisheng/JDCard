@@ -50,7 +50,7 @@ def Navigate(url,data={}):
             req = urllib.request.urlopen(req).read()
             tryTimes = tryTimes +1
         except socket.error:
-            print("连接失败，尝试重新连接")
+            print("连接失败，尝试重新连接:%s" % url)
             traceback.print_exc()
         else:
             break

